@@ -1,1 +1,2 @@
-# Matador
+**Matador: A stock trading simulator**
+Ever wanted to try your hand at trading stocks on the markets, without the possibility of losing everything? With Matador, you can trade near-real time or test yourself against the past markets. If you've ever thought "I would *never* lose my shirt in the Great Depression", now you can prove it... or not. Good luck and may your markets be bullish and not bearish.

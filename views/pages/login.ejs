@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <% include ../partials/header.ejs %>
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <meta name="google-signin-scope" content="profile email">
+  <meta name="google-signin-client_id" content="16117319787-5sabt8orh1djfb26hnq0th7aedi9e8n2.apps.googleusercontent.com">
+  
+
+
+</head>
+
+<body>
+  <% include ../partials/loginnav.ejs %>
+<div class="jumbotron text-center">
+  <div class="container">
+    <h1 style="font-family:impact;">
+        <img style="height:70px;" src="matador.png"></a>
+        Matador
+    </h1>
+    <p>Grab the market by the horns</p>
+  </div>
+</div>
+
+<div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+    <script>
+      function onSignIn(googleUser) {
+        // Useful data for your client-side scripts:
+        var profile = googleUser.getBasicProfile();
+        console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+        console.log('Full Name: ' + profile.getName());
+        console.log('Given Name: ' + profile.getGivenName());
+        console.log('Family Name: ' + profile.getFamilyName());
+        console.log("Image URL: " + profile.getImageUrl());
+        console.log("Email: " + profile.getEmail());
+
+        // The ID token you need to pass to your backend:
+        var id_token = googleUser.getAuthResponse().id_token;
+        console.log("ID Token: " + id_token);
+
+        var login = new XMLHttpRequest();
+        login.open("GET", "http://matadorexchange.herokuapp.com/userProfile?id_token="+id_token, true);
+
+
+        login.onreadystatechange = function() {//Call a function when the state changes.
+        	console.log(login.readyState + " " +login.status)
+		    if(login.readyState == 4 && login.status == 200) {
+		    	console.log("logged in");
+		        window.location = "portfolio";
+		    }
+		}
+
+        login.send();
+      };
+    </script>
+
+</body>
+</html>
+
+
+<!--
+
+xH47HgwzERA6cRPxDqGNdJL5 

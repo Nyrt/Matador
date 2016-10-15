@@ -1,0 +1,91 @@
+<DOCTYPE html>
+<html>
+<head>
+  <% include ../partials/header.ejs %>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+  <script src="http://colineberhardt.github.io/d3fc/Layout.js"></script>
+  <script src="http://colineberhardt.github.io/d3fc/d3fc.js"></script>
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-scope" content="profile email">
+      <meta name="google-signin-client_id"
+      content="16117319787-5sabt8orh1djfb26hnq0th7aedi9e8n2.apps.googleusercontent.com">
+</head>
+
+<body>
+  <% include ../partials/nav.ejs %>
+<div class="jumbotron text-center">
+  <div class="container">
+    <h1 style="font-family:impact">
+        <img style="height:70px;" src="matador.png"></a>
+        Matador
+    </h1>
+    <p>Grab the market by the horns</p>
+  </div>
+</div>
+<input type="text" id="stocksearch" style="display:block; margin:auto; text-transform:uppercase;" placeholder="search">
+<script>
+    $("#stocksearch").keyup(function(event){
+        if(event.keyCode == 13){
+            console.log("success"); 
+            var request = new XMLHttpRequest();
+            request.open("POST", "http://matadorexchange.herokuapp.com/getQuote", true);
+            request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            request.onreadystatechange = function(){
+                if(request.readyState == 4 && request.status == 200){
+                    var raw = request.responseText;
+                    var data = JSON.parse(raw);
+                    renderData(data);
+                }
+            }
+            var input = document.getElementById('stocksearch').value;
+            request.send("symbol='" + input + "'");
+        }
+    });
+
+    function renderData(data){
+        console.log(data);
+        if(data.Ask == null){
+            document,getElementById("ask").innerHTML="a stock with that name does not exist!";
+        } else {
+            document.getElementById("symbol").innerHTML=data.symbol;
+            document.getElementById("ask").innerHTML="Ask: "+data.Ask;
+            document.getElementById("bid").innerHTML="Bid: "+data.Bid;
+            document.getElementById("change").innerHTML="Change: "+data.Change;
+        }
+    }
+
+    function buy(){
+      request = new XMLHttpRequest();
+      request.open("POST", "http://matadorexchange.herokuapp.com/buyStock", true);
+      
+      request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+      request.onreadystatechange=function(){
+        if(request.readyState == 4 && request.status == 200){
+          
+          console.log(request.responseText);
+          document.getElementById("response").innerHTML = "You bought 1 share in " + document.getElementById('stocksearch').value;
+        }
+      }
+
+
+      request.send("id_token=" + gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token +  "&symbol='" + document.getElementById('stocksearch').value + "'&quantity=1");
+    }
+
+</script>
+<h1 id="symbol" style="text-align:center"></h1>
+<div id="ask" style="text-align:center"></div>
+<div id="bid" style="text-align:center"></div>
+<div id="change" style="text-align:center"></div>
+
+<a type="button" class="btn btn-lg btn-default" onclick="buy();"
+style="position:absolute; left:47%;">Buy</a>
+<div id="response"></div>
+<!--</br>
+<svg id='time-series' style='height: 300px; width: 50%;'></svg>
+  <script src="draw_graph.js"></script>
+  <script>
+    drawGraph("testdata.txt");
+  </script>--> 
+</body>
+</html>

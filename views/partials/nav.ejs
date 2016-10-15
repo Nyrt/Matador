@@ -1,0 +1,110 @@
+<nav class="navbar navbar-default navbar-static-top navbar-inverse">
+  <div class="container">
+    <ul class="nav navbar-nav">
+      <li>
+        <a href="portfolio"><span
+        class="glyphicon glyphicon-user"> Portfolio</span> </a>
+      </li>
+      <li>
+        <a href="buysell"><span
+        class="glyphicon glyphicon-usd"> Buy/Sell</span> </a>
+      </li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li class="navbar-right">
+        <a href="login" onclick="signOut();">
+            <span class="glyphicon glyphicon-log-out"></span>
+            Logout
+          <script>
+            function signOut() {
+                  var auth2 = gapi.auth2.getAuthInstance();
+                      auth2.signOut().then(function () {
+                                console.log('User signed out.');
+                                    });
+                        }
+
+            function sell(symbol){
+              request = new XMLHttpRequest();
+              request.open("POST", "http://matadorexchange.herokuapp.com/sellStock", true);
+              
+              request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+              request.onreadystatechange=function(){
+                if(request.readyState == 4 && request.status == 200){
+                  
+                  console.log(request.responseText);
+                  displayPortfolio();
+                }
+              }
+
+                request.send("id_token=" + gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token +  "&symbol='" + symbol + "'&quantity=1");
+            }
+            
+
+            function displayPortfolio(){
+              request = new XMLHttpRequest();
+                        request.open("GET", "http://matadorexchange.herokuapp.com/userProfile?id_token=" + gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token, true);
+                        request.onreadystatechange=function(state){
+                          if(request.readyState == 4 && request.status == 200){
+                            data = JSON.parse(request.responseText);
+
+                            portfolio = "<h2>You have: $" + Math.round(data.money*1000)/1000 + "</h2>";
+
+                            for(stock in data.stocks){
+
+/*
+                              var data_get = new XMLHttpRequest();
+                              data_get.open("POST", "http://matadorexchange.herokuapp.com/getQuote", true);
+                              data_get.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                              data_get.onreadystatechange = function(){
+                                  if(data_get.readyState == 4 && data_get.status == 200){
+                                      var raw = data_get.responseText;
+                                      var data = JSON.parse(raw);
+                                      location = document.getElementById(stock+"_value");
+                                      location.innerHTML = data.ask;
+                                  }
+                              }
+                              data_get.send("symbol='" + stock + "'");*/
+
+
+                              portfolio += 
+                              "<div class='stock_item'><span class='symbol' id='"+ stock +"'>" 
+                                + stock + 
+                                "</span> <span class='quantity'>Quantity: " 
+                                + data.stocks[stock].quantity + 
+                                "</span> <span class='net_spent'>Net Cost: $" 
+                                + Math.round(data.stocks[stock].net_spent *1000)/1000
+                                + '<a type="button" class="btn btn-lg btn-default" onclick="sell(' + stock + ');">Sell</a></div>';
+                            }
+                            
+
+                            stocks.innerHTML = portfolio;
+                            //console.log(request.responseText);
+                          }
+                        }
+                        request.send();
+            }
+
+            function onLoad() {
+                gapi.load('auth2', function() {
+                  gapi.auth2.init().then(function()
+                  {
+                    if (!gapi.auth2.getAuthInstance().isSignedIn.get())
+                      window.location = "login";
+                    else {
+                      stocks = document.getElementById("stocks");
+                      if(stocks){
+                        displayPortfolio();
+                      }
+                    }
+                  });
+                });
+
+              }
+          </script>
+          <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
